@@ -12,7 +12,7 @@ import { canOfferPaidRevive, revivePaid, reviveDeadline, validateDay } from '../
 import { PRICES, RULES } from '../../domain/rules';
 import type { Companion as CompanionT } from '../../domain/types';
 import { formatDuration, formatMoney, formatNumber, roman, t } from '../../i18n';
-import { purchase } from '../../services/purchases';
+import { PRODUCTS, purchase } from '../../services/purchases';
 import { useGame } from '../../state/GameProvider';
 import { companionMessage, livedDays, useDerived } from '../../state/derived';
 import { WIDE_BREAKPOINT, colors, fonts } from '../../theme';
@@ -189,7 +189,7 @@ function DeadView({ companion: c }: { companion: CompanionT }) {
   const currency = d.currency;
 
   const buy = async () => {
-    const ok = await purchase(c.name, PRICES.revive, currency);
+    const ok = await purchase(PRODUCTS.revive, c.name, PRICES.revive, currency);
     if (ok) update((s, n) => revivePaid(s, n, c.id));
   };
 

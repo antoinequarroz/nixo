@@ -14,6 +14,7 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { GameProvider, useGame } from '../state/GameProvider';
+import { SocialProvider } from '../state/SocialProvider';
 import { colors } from '../theme';
 
 function Root() {
@@ -41,8 +42,10 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <GameProvider>
-        <StatusBar style="light" />
-        <Root />
+        <SocialProvider>
+          <StatusBar style="light" />
+          <Root />
+        </SocialProvider>
       </GameProvider>
     </SafeAreaProvider>
   );

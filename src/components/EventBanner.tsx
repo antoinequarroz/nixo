@@ -6,7 +6,7 @@ import { useGame } from '../state/GameProvider';
 import { colors, fonts } from '../theme';
 import { Label } from './ui';
 
-const SHOWN = new Set(['evolved', 'revived', 'goalReached', 'frozen']);
+const SHOWN = new Set(['evolved', 'revived', 'goalReached', 'frozen', 'reported', 'cheered']);
 
 export function useHasEvent(): boolean {
   const { state } = useGame();
@@ -33,6 +33,14 @@ export function EventBanner() {
       break;
     case 'frozen':
       text = t.events.frozen;
+      break;
+    case 'reported': {
+      const active = state.companions.find((x) => x.id === state.activeId);
+      text = t.events.reported(event.who ?? '', active?.name ?? '');
+      break;
+    }
+    case 'cheered':
+      text = t.events.cheered(event.who ?? '');
       break;
   }
   if (!text) return null;

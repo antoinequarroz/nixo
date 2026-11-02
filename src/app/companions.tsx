@@ -9,7 +9,7 @@ import { adopt, setActive, unlockSpecies } from '../domain/engine';
 import { PRICES, stageIndex } from '../domain/rules';
 import { SPECIES } from '../domain/species';
 import { formatMoney, t } from '../i18n';
-import { purchase } from '../services/purchases';
+import { PRODUCTS, purchase } from '../services/purchases';
 import { useGame } from '../state/GameProvider';
 import { livedDays } from '../state/derived';
 import { colors } from '../theme';
@@ -28,7 +28,7 @@ export default function Companions() {
 
   const pickSpecies = async (id: string) => {
     if (state.ownedSpecies.includes(id)) return setSpecies(id);
-    const ok = await purchase(t.species[id], PRICES.species, currency);
+    const ok = await purchase(PRODUCTS.species(id), t.species[id], PRICES.species, currency);
     if (ok) {
       update((s) => unlockSpecies(s, id));
       setSpecies(id);

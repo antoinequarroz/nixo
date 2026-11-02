@@ -9,7 +9,7 @@ import { PRICES, RULES } from '../domain/rules';
 import { formatMoney, t } from '../i18n';
 import { confirm } from '../services/dialog';
 import { askForNotifications, notificationsAllowed } from '../services/notifications';
-import { purchase } from '../services/purchases';
+import { PRODUCTS, purchase } from '../services/purchases';
 import { useGame } from '../state/GameProvider';
 
 const HOUR = 3_600_000;
@@ -26,7 +26,7 @@ export default function Settings() {
   const close = () => (router.canGoBack() ? router.back() : router.replace('/home'));
 
   const buyFreezes = async () => {
-    if (await purchase(t.settings.freezes, PRICES.freezePack, currency)) update((s) => addFreezes(s, RULES.freezesPerPack));
+    if (await purchase(PRODUCTS.freezePack, t.settings.freezes, PRICES.freezePack, currency)) update((s) => addFreezes(s, RULES.freezesPerPack));
   };
   const advance = (ms: number) => update((s) => advanceClock(s, ms, Date.now()));
   const clock = new Date(now);

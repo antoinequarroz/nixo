@@ -2,6 +2,9 @@ import { addDays, dayKey } from '../dates';
 import {
   activeCompanion,
   adopt,
+  applyReports,
+  migrateState,
+  receiveCheers,
   canOfferPaidRevive,
   createInitialState,
   pendingDay,
@@ -169,5 +172,27 @@ describe('savings', () => {
   it('flags the goal when reached', () => {
     const s = cleanDays(start(), 0, 5);
     expect(s.events.some((e) => e.kind === 'goalReached')).toBe(true);
+  });
+});
+
+describe('online reports and cheers', () => {
+  it('a server report costs 15 % once, even if received twice', () => {
+    let s = applyReports(start(), T0, [{ id: 'r1', witnessName: 'Chloé' }]);
+    s = applyReports(s, T0, [{ id: 'r1', witnessName: 'Chloé' }]);
+    expect(activeCompanion(s)!.health).toBe(80 + RULES.witnessReportHealth);
+    expect(s.events.filter((e) => e.kind === 'reported')).toEqual([expect.objectContaining({ who: 'Chloé' })]);
+  });
+
+  it('cheers become events with the sender name', () => {
+    const s = receiveCheers(start(), T0, ['Bob']);
+    expect(s.events[s.events.length - 1]).toEqual(expect.objectContaining({ kind: 'cheered', who: 'Bob' }));
+  });
+
+  it('old saved states get the new fields', () => {
+    const { appliedReports, displayName, ...old } = start();
+    const m = migrateState(old);
+    expect(m.appliedReports).toEqual([]);
+    expect(m.displayName).toBe('');
+    expect(m.profile).toEqual(old.profile);
   });
 });

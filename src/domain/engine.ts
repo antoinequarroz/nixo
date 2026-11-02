@@ -33,9 +33,16 @@ export function createInitialState(): GameState {
     partner: null,
     inviteCode: makeInviteCode(),
     ownedSpecies: ['ember'],
+    displayName: '',
+    appliedReports: [],
     events: [],
     clockOffsetMs: 0,
   };
+}
+
+/** Fills fields added after a state was saved by an older version of the app. */
+export function migrateState(saved: Partial<GameState>): GameState {
+  return { ...createInitialState(), ...saved, version: 1 };
 }
 
 export function newCompanion(name: string, speciesId: string, today: DayKey): Companion {
@@ -362,4 +369,33 @@ export function cheerPartner(state: GameState, now: number): GameState {
 export function advanceClock(state: GameState, ms: number, realNow: number): GameState {
   const next = { ...state, clockOffsetMs: state.clockOffsetMs + ms };
   return settle(next, realNow + next.clockOffsetMs);
+}
+
+// ---------- online duo & witnesses ----------
+
+/** Applies witness reports received from the server (each one only once). */
+export function applyReports(state: GameState, now: number, reports: { id: string; witnessName: string }[]): GameState {
+  const fresh = reports.filter((r) => !state.appliedReports.includes(r.id));
+  if (fresh.length === 0) return state;
+  const events: GameEvent[] = [];
+  let companions = state.companions;
+  for (const r of fresh) {
+    companions = companions.map((c) => changeHealth(c, RULES.witnessReportHealth, now, events));
+    events.push({ kind: 'reported', who: r.witnessName, at: now });
+  }
+  return {
+    ...state,
+    companions,
+    appliedReports: [...state.appliedReports, ...fresh.map((r) => r.id)].slice(-200),
+    events: [...state.events, ...events],
+  };
+}
+
+export function receiveCheers(state: GameState, now: number, names: string[]): GameState {
+  if (names.length === 0) return state;
+  return { ...state, events: [...state.events, ...names.map((who) => ({ kind: 'cheered' as const, who, at: now }))] };
+}
+
+export function setDisplayName(state: GameState, name: string): GameState {
+  return { ...state, displayName: name.trim().slice(0, 40) };
 }

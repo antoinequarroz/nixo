@@ -2,9 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 
-import { activeCompanion, createInitialState, settle } from '../domain/engine';
+import { activeCompanion, createInitialState, migrateState, settle } from '../domain/engine';
 import type { GameState } from '../domain/types';
 import { scheduleReminders } from '../services/notifications';
+import { ownedSpeciesFromStore } from '../services/purchases';
 
 const STORAGE_KEY = 'nixo.state.v1';
 
@@ -34,13 +35,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
         if (raw) {
-          const saved = JSON.parse(raw) as GameState;
-          if (saved.version === 1) setState(settle(saved, Date.now() + saved.clockOffsetMs));
+          const saved = migrateState(JSON.parse(raw) as Partial<GameState>);
+          setState(settle(saved, Date.now() + saved.clockOffsetMs));
         }
       })
       .catch(() => undefined)
       .finally(() => setReady(true));
   }, []);
+
+  // Species bought before (reinstall, new phone) come back from the store.
+  useEffect(() => {
+    if (!ready) return;
+    ownedSpeciesFromStore().then((ids) => {
+      if (ids.length > 0) setState((s) => ({ ...s, ownedSpecies: [...new Set([...s.ownedSpecies, ...ids])] }));
+    });
+  }, [ready]);
 
   // Save on every change.
   useEffect(() => {

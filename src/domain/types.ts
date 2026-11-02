@@ -49,8 +49,10 @@ export interface Partner {
 }
 
 export interface GameEvent {
-  kind: 'evolved' | 'died' | 'revived' | 'buried' | 'lowHealth' | 'goalReached' | 'frozen';
+  kind: 'evolved' | 'died' | 'revived' | 'buried' | 'lowHealth' | 'goalReached' | 'frozen' | 'reported' | 'cheered';
   companionId?: string;
+  /** First name of the witness or duo partner behind the event. */
+  who?: string;
   at: number;
 }
 
@@ -68,6 +70,10 @@ export interface GameState {
   partner: Partner | null;
   inviteCode: string;
   ownedSpecies: string[];
+  /** First name shown to the duo partner and witnesses (online mode). */
+  displayName: string;
+  /** Server report ids already applied, so a report never costs health twice. */
+  appliedReports: string[];
   /** Latest events, for the UI to show once (evolution, death...). */
   events: GameEvent[];
   /** Prototype only: moves the app clock forward to play through days quickly. */
