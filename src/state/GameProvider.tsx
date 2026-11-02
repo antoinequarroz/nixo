@@ -74,10 +74,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Keep the evening reminders in line with the journal.
   const journalSize = Object.keys(state.journal).length;
   const companion = activeCompanion(state);
+  const lowHealth = (companion?.health ?? 100) < 30;
   useEffect(() => {
     if (!ready || !state.profile || !companion) return;
-    scheduleReminders(stateRef.current, Date.now() + stateRef.current.clockOffsetMs, companion.name).catch(() => undefined);
-  }, [ready, journalSize, state.profile?.reminderHour, companion?.name, state.profile]);
+    scheduleReminders(stateRef.current, Date.now() + stateRef.current.clockOffsetMs).catch(() => undefined);
+  }, [ready, journalSize, state.profile, state.morningMessages, companion?.name, companion?.status, lowHealth]);
 
   const update = useCallback((fn: (s: GameState, now: number) => GameState) => {
     const t = Date.now();

@@ -1,9 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AppState } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
+import { AppState, Platform } from 'react-native';
 
 import { dayKey } from '../domain/dates';
 import { activeCompanion, applyReports, receiveCheers, streak } from '../domain/engine';
 import { stageIndex } from '../domain/rules';
+import { registerForPush } from '../services/push';
 import * as social from '../services/social';
 import { isOnline } from '../services/supabase';
 import { useGame } from './GameProvider';
@@ -67,6 +70,25 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       setStatus('error');
     }
   }, [me, update]);
+
+  // Register this phone for pushes, and refresh as soon as one arrives.
+  useEffect(() => {
+    if (!me) return;
+    registerForPush().catch(() => undefined);
+    if (Platform.OS !== 'ios' && Platform.OS !== 'android') return;
+    const received = Notifications.addNotificationReceivedListener(() => refresh());
+    const opened = Notifications.addNotificationResponseReceivedListener((response) => {
+      const kind = (response.notification.request.content.data as { kind?: string } | undefined)?.kind;
+      if (kind === 'report' || kind === 'cheer') {
+        refresh();
+        router.navigate('/home');
+      }
+    });
+    return () => {
+      received.remove();
+      opened.remove();
+    };
+  }, [me, refresh]);
 
   // Poll while the app is open, and on every return to the foreground.
   useEffect(() => {

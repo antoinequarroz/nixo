@@ -42,6 +42,11 @@ assert.equal(r.data, true); ok('bob cheers alice');
 r = await alice.sb.rpc('consume_cheers');
 assert.equal(r.data[0].from_name, 'Bob'); ok('alice receives the cheer');
 
+r = await alice.sb.rpc('register_push_token', { token: 'ExponentPushToken[smoke-alice]', locale: 'fr' });
+assert.ifError(r.error); ok('alice registers her phone for pushes');
+r = await alice.sb.from('push_tokens').select('*');
+assert.ok(r.error || r.data.length === 0); ok('push tokens are not readable by clients');
+
 r = await chloe.sb.rpc('request_witness', { code: alice.code });
 assert.ifError(r.error);
 r = await chloe.sb.rpc('report_smoking', { owner: alice.id, day: today });

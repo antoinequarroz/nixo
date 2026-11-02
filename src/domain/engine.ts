@@ -33,6 +33,7 @@ export function createInitialState(): GameState {
     partner: null,
     inviteCode: makeInviteCode(),
     ownedSpecies: ['ember'],
+    morningMessages: true,
     displayName: '',
     appliedReports: [],
     events: [],

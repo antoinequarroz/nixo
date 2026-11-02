@@ -19,6 +19,9 @@ run "$BIN/initdb" -D "$TMP/data" -A trust -U postgres >/dev/null
 run "$BIN/pg_ctl" -D "$TMP/data" -o "-p $PORT -k $TMP" -l "$TMP/log" start -w >/dev/null
 PSQL=("$BIN/psql" -h "$TMP" -p "$PORT" -U postgres -d postgres -v ON_ERROR_STOP=1 -q)
 "${PSQL[@]}" -f "$ROOT/supabase/sql-tests/auth_shim.sql"
-for f in "$ROOT"/supabase/migrations/*.sql; do "${PSQL[@]}" -f "$f"; done
-"${PSQL[@]}" -o /dev/null -f "$ROOT/supabase/sql-tests/social_test.sql" 2>&1 | sed 's/^psql:[^ ]* NOTICE:  /  /'
+# pg_net is a Supabase extension: the shim above stands in for it.
+for f in "$ROOT"/supabase/migrations/*.sql; do grep -v "create extension if not exists pg_net" "$f" | "${PSQL[@]}"; done
+for t in social push; do
+  "${PSQL[@]}" -o /dev/null -f "$ROOT/supabase/sql-tests/${t}_test.sql" 2>&1 | sed 's/^psql:[^ ]* NOTICE:  /  /'
+done
 echo "All database tests passed."

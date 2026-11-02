@@ -70,6 +70,8 @@ export interface GameState {
   partner: Partner | null;
   inviteCode: string;
   ownedSpecies: string[];
+  /** Morning message from the companion (optional, on by default). */
+  morningMessages: boolean;
   /** First name shown to the duo partner and witnesses (online mode). */
   displayName: string;
   /** Server report ids already applied, so a report never costs health twice. */

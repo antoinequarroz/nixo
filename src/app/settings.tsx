@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, Switch, View } from 'react-native';
 
 import { IconButton } from '../components/IconButton';
 import { Body, GhostButton, HeaderRow, Headline, Label, PrimaryButton, Rule, Screen, Stepper } from '../components/ui';
@@ -11,6 +11,7 @@ import { confirm } from '../services/dialog';
 import { askForNotifications, notificationsAllowed } from '../services/notifications';
 import { PRODUCTS, purchase } from '../services/purchases';
 import { useGame } from '../state/GameProvider';
+import { colors } from '../theme';
 
 const HOUR = 3_600_000;
 
@@ -74,6 +75,16 @@ export default function Settings() {
       ) : (
         <GhostButton style={{ marginTop: 10 }} label={t.settings.notificationsOff} onPress={() => askForNotifications().then(setNotifOn)} />
       )}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, minHeight: 52 }}>
+        <Body style={{ flex: 1 }}>{t.settings.morning}</Body>
+        <Switch
+          accessibilityLabel={t.settings.morning}
+          value={state.morningMessages}
+          onValueChange={(v) => update((s) => ({ ...s, morningMessages: v }))}
+          trackColor={{ false: 'rgba(237,230,218,0.2)', true: colors.accent }}
+          thumbColor={colors.ink}
+        />
+      </View>
 
       <Rule style={{ marginTop: 16 }} />
       <Label small style={{ marginTop: 16 }}>

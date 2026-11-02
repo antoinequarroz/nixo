@@ -9,3 +9,10 @@ create function auth.uid() returns uuid language sql stable as $$
 $$;
 grant usage on schema auth, public to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
+
+-- Stand-in for pg_net: records outgoing requests instead of sending them.
+create schema net;
+create table net.sent (id bigserial primary key, url text, body jsonb, headers jsonb);
+create function net.http_post(url text, body jsonb, headers jsonb) returns bigint language sql as $$
+  insert into net.sent (url, body, headers) values (url, body, headers) returning id
+$$;

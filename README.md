@@ -30,7 +30,8 @@ npx eas-cli@latest build --profile preview --platform ios       # nécessite le 
 | Gels de série | protègent un jour oublié (pack de 3, achat simulé) |
 | Économies | argent, cigarettes non fumées, vie regagnée, objectif avec date estimée, projections |
 | Messages | écrits du point de vue du compagnon, FR et EN, selon sa santé et ta journée |
-| Rappels | notification du soir à l'heure choisie + seconde 2 h plus tard si pas validé |
+| Rappels | message du matin du compagnon (désactivable), rappel du soir à l'heure choisie + second 2 h plus tard si pas validé ; texte spécial si santé basse ou compagnon éteint |
+| Notifications push | dès qu'un témoin signale ou que le binôme encourage, envoyées par le serveur via Expo |
 | Binôme et témoins | vrais via Supabase (code d'invitation, témoins acceptés, 1 signalement par jour, encouragements), simulés si le serveur n'est pas configuré |
 | Plusieurs compagnons | chacun nommé par l'utilisateur, 4 espèces (1 gratuite, 3 à débloquer, achat simulé) |
 | Pliables | au-delà de 600 px de large, l'accueil passe en deux panneaux |
@@ -48,6 +49,10 @@ Sans configuration, l'app tourne en **mode simulé** (binôme, témoins et achat
    - Créer les produits dans App Store Connect et Google Play, avec ces identifiants : `nixo_revive` (consommable), `nixo_freeze_pack_3` (consommable), `nixo_species_moss`, `nixo_species_mist`, `nixo_species_ochre` (non consommables).
    - Les ajouter dans RevenueCat, puis mettre les clés publiques iOS et Android dans `.env`.
    - Les vrais achats ne marchent pas dans Expo Go : il faut un build de développement (`npx eas-cli@latest build --profile development`).
+4. **Notifications push** (signalements, encouragements)
+   - Lier le projet à EAS une fois : `npx eas-cli@latest init` (ajoute l'identifiant du projet dans la config).
+   - iOS : `npx eas-cli@latest credentials` crée la clé de notifications Apple. Android : ajouter le fichier `google-services.json` de Firebase (Expo l'explique pas à pas).
+   - Côté serveur, rien à faire : la base envoie les push elle-même (extension `pg_net` de Supabase).
 
 Le jeu (santé, série, évolution) reste calculé sur le téléphone. Le serveur ne garde que ce que les autres doivent voir (prénom, nom et état du compagnon, série) et les actions des autres sur toi (signalements, encouragements). Toutes les écritures passent par des fonctions SQL contrôlées, et chaque personne ne voit que son binôme et ses témoins.
 
@@ -87,7 +92,6 @@ npx supabase start && SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_ANON_KEY=<ano
 
 ## Étapes suivantes
 
-- Notifications push quand un témoin signale ou qu'un binôme encourage (aujourd'hui l'info arrive à l'ouverture de l'app)
 - Abonnement Premium dans RevenueCat
 - Lier le compte anonyme à Apple / Google pour retrouver ses données sur un nouveau téléphone
 - Les ~150 messages du compagnon prévus pour la V1 (le prototype en a une quarantaine par langue)

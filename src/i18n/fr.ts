@@ -221,6 +221,7 @@ export const fr = {
     notifications: 'Rappels',
     notificationsOn: 'Activés',
     notificationsOff: 'Activer les rappels',
+    morning: 'Message du matin',
     freezes: 'Gels de série',
     freezesHint: (n: number) => `${n} en réserve. Un gel protège ta série un jour où tu oublies de valider.`,
     buyFreezes: (price: string) => `3 gels · ${price}`,
@@ -262,6 +263,8 @@ export const fr = {
     reminderTitle: 'Nixo',
     reminder: (name: string) => `${name} attend de savoir comment s’est passée ta journée.`,
     second: (name: string) => `Toujours là. ${name} ne dort pas tant que tu n’as pas validé.`,
+    low: (name: string) => `${name} faiblit. Une journée sans fumer, et il reprend des forces.`,
+    dead: (name: string) => `${name} peut encore revenir. Valide ta journée.`,
   },
 };
 

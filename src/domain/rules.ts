@@ -25,6 +25,8 @@ export const RULES = {
   /** Default evening reminder, and the second one this many hours later. */
   defaultReminderHour: 21,
   secondReminderDelayHours: 2,
+  /** Optional morning message in the companion's voice. */
+  morningHour: 9,
   /** Common estimate: each cigarette not smoked gives back about 11 minutes of life. */
   minutesPerCigarette: 11,
   freezesPerPack: 3,

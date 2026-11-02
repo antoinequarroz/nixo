@@ -216,6 +216,7 @@ export const en: Dict = {
     notifications: 'Reminders',
     notificationsOn: 'On',
     notificationsOff: 'Turn on reminders',
+    morning: 'Morning message',
     freezes: 'Streak freezes',
     freezesHint: (n) => `${n} in reserve. A freeze protects your streak on a day you forget to check in.`,
     buyFreezes: (price) => `3 freezes · ${price}`,
@@ -257,5 +258,7 @@ export const en: Dict = {
     reminderTitle: 'Nixo',
     reminder: (name) => `${name} is waiting to hear how your day went.`,
     second: (name) => `Still here. ${name} won’t sleep until you check in.`,
+    low: (name) => `${name} is fading. One smoke-free day and it gets stronger.`,
+    dead: (name) => `${name} can still come back. Check in your day.`,
   },
 };
