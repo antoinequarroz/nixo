@@ -229,6 +229,11 @@ export const en: Dict = {
     resetClock: 'Back to real time',
     reset: 'Erase everything',
     resetConfirm: 'Erase all data and start over?',
+    deleteAccount: 'Delete my account',
+    deleteAccountConfirm: 'Your account, duo, witnesses and all your data will be deleted, on this phone and on the server. This can’t be undone.',
+    deleteFailed: 'Deletion didn’t go through. Check your connection and try again.',
+    legal: 'Privacy and terms',
+    medical: 'Nixo is not a medical device. For support, talk to a health professional.',
   },
 
   onboarding: {

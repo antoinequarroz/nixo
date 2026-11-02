@@ -40,6 +40,14 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const hasProfile = state.profile != null;
 
+  // After an account deletion, forget everything about the old account.
+  useEffect(() => {
+    if (hasProfile) return;
+    setMe(null);
+    setSnapshot(null);
+    setStatus(isOnline ? 'connecting' : 'off');
+  }, [hasProfile]);
+
   // Sign in once the person has finished onboarding.
   useEffect(() => {
     if (!isOnline || !ready || !hasProfile || me) return;

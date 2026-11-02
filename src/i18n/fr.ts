@@ -234,6 +234,11 @@ export const fr = {
     resetClock: 'Revenir à l’heure réelle',
     reset: 'Tout effacer',
     resetConfirm: 'Effacer toutes les données et recommencer ?',
+    deleteAccount: 'Supprimer mon compte',
+    deleteAccountConfirm: 'Ton compte, ton binôme, tes témoins et toutes tes données seront supprimés, sur ce téléphone et sur le serveur. C’est définitif.',
+    deleteFailed: 'La suppression n’a pas abouti. Vérifie ta connexion et réessaie.',
+    legal: 'Confidentialité et conditions',
+    medical: 'Nixo n’est pas un dispositif médical. Pour un accompagnement, parle à un professionnel de santé.',
   },
 
   onboarding: {

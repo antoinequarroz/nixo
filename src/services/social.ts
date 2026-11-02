@@ -84,6 +84,15 @@ export async function signIn(): Promise<Me> {
   return { id: profile.id, inviteCode: profile.invite_code };
 }
 
+/** Deletes the account and all its server data, then forgets the session. */
+export async function deleteAccount(): Promise<void> {
+  const sb = client();
+  const { data } = await sb.auth.getSession();
+  if (!data.session) return;
+  await rpc<void>('delete_account');
+  await sb.auth.signOut({ scope: 'local' });
+}
+
 export async function pushStats(me: string, s: PublicStats): Promise<void> {
   const { error } = await client()
     .from('profiles')

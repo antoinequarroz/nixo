@@ -71,4 +71,11 @@ const anon = createClient(url, key, { auth: { persistSession: false } });
 r = await anon.rpc('ensure_profile');
 assert.ok(r.error); ok('signed-out callers are refused');
 
+r = await chloe.sb.rpc('delete_account');
+assert.ifError(r.error); ok('chloé deletes her account');
+r = await bob.sb.rpc('ensure_profile');
+assert.ifError(r.error);
+r = await chloe.sb.rpc('ensure_profile');
+assert.ok(r.error); ok('a deleted account cannot come back with its old session');
+
 console.log('Supabase smoke test passed.');

@@ -21,7 +21,7 @@ PSQL=("$BIN/psql" -h "$TMP" -p "$PORT" -U postgres -d postgres -v ON_ERROR_STOP=
 "${PSQL[@]}" -f "$ROOT/supabase/sql-tests/auth_shim.sql"
 # pg_net is a Supabase extension: the shim above stands in for it.
 for f in "$ROOT"/supabase/migrations/*.sql; do grep -v "create extension if not exists pg_net" "$f" | "${PSQL[@]}"; done
-for t in social push; do
+for t in social push delete; do
   "${PSQL[@]}" -o /dev/null -f "$ROOT/supabase/sql-tests/${t}_test.sql" 2>&1 | sed 's/^psql:[^ ]* NOTICE:  /  /'
 done
 echo "All database tests passed."

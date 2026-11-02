@@ -15,7 +15,13 @@
     },
     "ios": {
       "bundleIdentifier": "ch.nixo.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "ch.nixo.app",

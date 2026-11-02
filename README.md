@@ -34,6 +34,7 @@ npx eas-cli@latest build --profile preview --platform ios       # nécessite le 
 | Notifications push | dès qu'un témoin signale ou que le binôme encourage, envoyées par le serveur via Expo |
 | Binôme et témoins | vrais via Supabase (code d'invitation, témoins acceptés, 1 signalement par jour, encouragements), simulés si le serveur n'est pas configuré |
 | Plusieurs compagnons | chacun nommé par l'utilisateur, 4 espèces (1 gratuite, 3 à débloquer, achat simulé) |
+| Compte | aucune inscription ; « Supprimer mon compte » efface tout, sur le téléphone et le serveur |
 | Pliables | au-delà de 600 px de large, l'accueil passe en deux panneaux |
 
 ## Brancher le serveur et les achats
@@ -55,6 +56,16 @@ Sans configuration, l'app tourne en **mode simulé** (binôme, témoins et achat
    - Côté serveur, rien à faire : la base envoie les push elle-même (extension `pg_net` de Supabase).
 
 Le jeu (santé, série, évolution) reste calculé sur le téléphone. Le serveur ne garde que ce que les autres doivent voir (prénom, nom et état du compagnon, série) et les actions des autres sur toi (signalements, encouragements). Toutes les écritures passent par des fonctions SQL contrôlées, et chaque personne ne voit que son binôme et ses témoins.
+
+## Publier sur l'App Store et Google Play
+
+Tout ce qu'il faut pour les fiches est dans `docs/` :
+
+- `docs/legal/` : politique de confidentialité et conditions, en français et en anglais. À mettre en ligne sur une page publique, puis renseigner son adresse dans `EXPO_PUBLIC_LEGAL_URL` (lien dans Réglages).
+- `docs/store/` : textes des fiches FR et EN, réponses aux questionnaires (âge, confidentialité Apple, sécurité des données Google), produits à créer, étapes de build et d'envoi (`publication.md`).
+- `docs/store/screenshots/` : captures aux formats iPhone 6,9", iPad 13" et Android, en FR et EN. On les régénère avec `node scripts/store-screenshots.mjs` (mode d'emploi en tête du fichier).
+
+Dans une build de production, le labo d'horloge est caché, et Réglages propose **Supprimer mon compte**, qui efface le compte et toutes ses données sur le serveur (exigé par Apple et Google).
 
 ## Organisation du code
 
@@ -95,4 +106,4 @@ npx supabase start && SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_ANON_KEY=<ano
 - Abonnement Premium dans RevenueCat
 - Lier le compte anonyme à Apple / Google pour retrouver ses données sur un nouveau téléphone
 - Les ~150 messages du compagnon prévus pour la V1 (le prototype en a une quarantaine par langue)
-- Icône, écran de démarrage et fiches des stores
+- Mettre en ligne la politique de confidentialité (nixo.ch ?)

@@ -1,19 +1,24 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform, Switch, View } from 'react-native';
+import { Alert, Linking, Platform, Switch, View } from 'react-native';
 
 import { IconButton } from '../components/IconButton';
-import { Body, GhostButton, HeaderRow, Headline, Label, PrimaryButton, Rule, Screen, Stepper } from '../components/ui';
+import { Body, GhostButton, HeaderRow, Headline, Label, PrimaryButton, Rule, Screen, Stepper, TextLink } from '../components/ui';
 import { addFreezes, advanceClock, updateProfile } from '../domain/engine';
 import { PRICES, RULES } from '../domain/rules';
 import { formatMoney, t } from '../i18n';
 import { confirm } from '../services/dialog';
 import { askForNotifications, notificationsAllowed } from '../services/notifications';
 import { PRODUCTS, purchase } from '../services/purchases';
+import { deleteAccount } from '../services/social';
+import { isOnline } from '../services/supabase';
 import { useGame } from '../state/GameProvider';
 import { colors } from '../theme';
 
 const HOUR = 3_600_000;
+// The clock lab is for testing only: hidden in store builds unless asked for.
+const SHOW_LAB = __DEV__ || process.env.EXPO_PUBLIC_SHOW_LAB === '1';
+const LEGAL_URL = process.env.EXPO_PUBLIC_LEGAL_URL;
 
 export default function Settings() {
   const { state, now, update, reset } = useGame();
@@ -95,33 +100,53 @@ export default function Settings() {
       </Body>
       <GhostButton style={{ marginTop: 10 }} label={t.settings.buyFreezes(formatMoney(PRICES.freezePack, currency))} onPress={buyFreezes} />
 
-      <Rule style={{ marginTop: 20 }} />
-      <Label small style={{ marginTop: 16 }}>
-        {t.settings.lab}
-      </Label>
-      <Body muted style={{ marginTop: 8 }}>
-        {t.settings.labHint}
-      </Body>
-      <Body style={{ marginTop: 8, fontSize: 14 }}>
-        {t.settings.clock(`${t.weekdays[clock.getDay()]} ${clock.getDate()} ${t.monthsLong[clock.getMonth()]} · ${String(clock.getHours()).padStart(2, '0')}:${String(clock.getMinutes()).padStart(2, '0')}`)}
-      </Body>
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-        <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusHours(6)} onPress={() => advance(6 * HOUR)} />
-        <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusDay} onPress={() => advance(24 * HOUR)} />
-        <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusWeek} onPress={() => advance(7 * 24 * HOUR)} />
-      </View>
-      {state.clockOffsetMs > 0 ? (
-        <GhostButton style={{ marginTop: 8 }} label={t.settings.resetClock} onPress={() => update((s) => ({ ...s, clockOffsetMs: 0 }))} />
+      {SHOW_LAB ? (
+        <>
+          <Rule style={{ marginTop: 20 }} />
+          <Label small style={{ marginTop: 16 }}>
+            {t.settings.lab}
+          </Label>
+          <Body muted style={{ marginTop: 8 }}>
+            {t.settings.labHint}
+          </Body>
+          <Body style={{ marginTop: 8, fontSize: 14 }}>
+            {t.settings.clock(`${t.weekdays[clock.getDay()]} ${clock.getDate()} ${t.monthsLong[clock.getMonth()]} · ${String(clock.getHours()).padStart(2, '0')}:${String(clock.getMinutes()).padStart(2, '0')}`)}
+          </Body>
+          <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusHours(6)} onPress={() => advance(6 * HOUR)} />
+            <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusDay} onPress={() => advance(24 * HOUR)} />
+            <GhostButton style={{ flexGrow: 1 }} label={t.settings.plusWeek} onPress={() => advance(7 * 24 * HOUR)} />
+          </View>
+          {state.clockOffsetMs > 0 ? (
+            <GhostButton style={{ marginTop: 8 }} label={t.settings.resetClock} onPress={() => update((s) => ({ ...s, clockOffsetMs: 0 }))} />
+          ) : null}
+        </>
       ) : null}
+
+      <Rule style={{ marginTop: 20 }} />
+      <Body muted style={{ marginTop: 16, fontSize: 14 }}>
+        {t.settings.medical}
+      </Body>
+      {LEGAL_URL ? <TextLink style={{ marginTop: 8 }} label={t.settings.legal} onPress={() => Linking.openURL(LEGAL_URL)} /> : null}
 
       <PrimaryButton
         style={{ marginTop: 28 }}
-        label={t.settings.reset}
+        label={isOnline ? t.settings.deleteAccount : t.settings.reset}
         onPress={async () => {
-          if (await confirm(t.settings.reset, t.settings.resetConfirm, t.settings.reset)) {
-            reset();
-            router.replace('/onboarding');
+          const title = isOnline ? t.settings.deleteAccount : t.settings.reset;
+          const body = isOnline ? t.settings.deleteAccountConfirm : t.settings.resetConfirm;
+          if (!(await confirm(title, body, title))) return;
+          if (isOnline) {
+            try {
+              await deleteAccount();
+            } catch {
+              if (Platform.OS === 'web') window.alert(t.settings.deleteFailed);
+              else Alert.alert(title, t.settings.deleteFailed);
+              return;
+            }
           }
+          reset();
+          router.replace('/onboarding');
         }}
       />
     </Screen>
