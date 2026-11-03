@@ -1,6 +1,9 @@
 // Server side of the duo and witnesses. Every write is an RPC defined in
-// supabase/migrations; reads go through row level security.
+// supabase/migrations; reads go through row level security. Before Supabase is
+// set up, the same calls go to the local SQLite test server (see backend.ts).
 
+import { backend } from './backend';
+import { forgetLocalSession, LocalError, localRpc } from './localServer';
 import { supabase } from './supabase';
 
 export interface Me {
@@ -67,6 +70,13 @@ function fail(error: { message?: string } | null): never {
 }
 
 async function rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
+  if (backend === 'local') {
+    try {
+      return await localRpc<T>(fn, args);
+    } catch (e) {
+      fail({ message: e instanceof LocalError ? e.code : 'network' });
+    }
+  }
   const { data, error } = await client().rpc(fn, args);
   if (error) fail(error);
   return data as T;
@@ -74,6 +84,10 @@ async function rpc<T>(fn: string, args?: Record<string, unknown>): Promise<T> {
 
 /** Anonymous account on first launch, then the same one forever on this phone. */
 export async function signIn(): Promise<Me> {
+  if (backend === 'local') {
+    const profile = await rpc<{ id: string; invite_code: string }>('ensure_profile');
+    return { id: profile.id, inviteCode: profile.invite_code };
+  }
   const sb = client();
   const { data: session } = await sb.auth.getSession();
   if (!session.session) {
@@ -86,6 +100,11 @@ export async function signIn(): Promise<Me> {
 
 /** Deletes the account and all its server data, then forgets the session. */
 export async function deleteAccount(): Promise<void> {
+  if (backend === 'local') {
+    await rpc<void>('delete_account');
+    await forgetLocalSession();
+    return;
+  }
   const sb = client();
   const { data } = await sb.auth.getSession();
   if (!data.session) return;
@@ -94,18 +113,19 @@ export async function deleteAccount(): Promise<void> {
 }
 
 export async function pushStats(me: string, s: PublicStats): Promise<void> {
+  const row = {
+    display_name: s.displayName,
+    companion_name: s.companionName,
+    companion_species: s.companionSpecies,
+    companion_stage: s.stage,
+    companion_health: Math.round(s.health),
+    companion_status: s.status,
+    streak: s.streak,
+  };
+  if (backend === 'local') return rpc<void>('update_stats', row);
   const { error } = await client()
     .from('profiles')
-    .update({
-      display_name: s.displayName,
-      companion_name: s.companionName,
-      companion_species: s.companionSpecies,
-      companion_stage: s.stage,
-      companion_health: Math.round(s.health),
-      companion_status: s.status,
-      streak: s.streak,
-      updated_at: new Date().toISOString(),
-    })
+    .update({ ...row, updated_at: new Date().toISOString() })
     .eq('id', me);
   if (error) fail(error);
 }
@@ -133,6 +153,7 @@ const toPerson = (p: ProfileRow): Person => ({
 });
 
 export async function fetchSocial(me: string, today: string): Promise<SocialSnapshot> {
+  if (backend === 'local') return rpc<SocialSnapshot>('social_snapshot', { today });
   const sb = client();
   const [members, links, cheers, reports] = await Promise.all([
     sb.from('duo_members').select('user_id'),
@@ -177,3 +198,4 @@ export const respondWitness = (witness: string, accept: boolean) => rpc<void>('r
 export const removeWitnessLink = (other: string) => rpc<void>('remove_witness_link', { other });
 export const reportSmoking = (owner: string, day: string) => rpc<boolean>('report_smoking', { owner, day });
 export const sendCheer = (day: string) => rpc<boolean>('send_cheer', { day });
+export const registerPushToken = (token: string, locale: string) => rpc<void>('register_push_token', { token, locale });

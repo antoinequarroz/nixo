@@ -9,17 +9,18 @@ import { Platform } from 'react-native';
 
 import { lang } from '../i18n';
 import { notificationsAllowed } from './notifications';
-import { supabase } from './supabase';
+import { isOnline } from './backend';
+import { registerPushToken } from './social';
 
 function projectId(): string | undefined {
   return (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId ?? Constants.easConfig?.projectId;
 }
 
 export async function registerForPush(): Promise<boolean> {
-  if (!supabase || (Platform.OS !== 'ios' && Platform.OS !== 'android')) return false;
+  if (!isOnline || (Platform.OS !== 'ios' && Platform.OS !== 'android')) return false;
   const id = projectId();
   if (!id || !(await notificationsAllowed())) return false;
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId: id });
-  const { error } = await supabase.rpc('register_push_token', { token, locale: lang });
-  return !error;
+  await registerPushToken(token, lang);
+  return true;
 }

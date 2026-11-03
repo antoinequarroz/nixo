@@ -8,7 +8,7 @@ import { activeCompanion, applyReports, receiveCheers, streak } from '../domain/
 import { stageIndex } from '../domain/rules';
 import { registerForPush } from '../services/push';
 import * as social from '../services/social';
-import { isOnline } from '../services/supabase';
+import { isOnline } from '../services/backend';
 import { useGame } from './GameProvider';
 
 type Status = 'off' | 'connecting' | 'ready' | 'error';

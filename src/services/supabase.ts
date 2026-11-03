@@ -15,5 +15,3 @@ export const supabase: SupabaseClient | null =
         auth: { storage: AsyncStorage, autoRefreshToken: true, persistSession: true, detectSessionInUrl: false },
       })
     : null;
-
-export const isOnline = supabase != null;

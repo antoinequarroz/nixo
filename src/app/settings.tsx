@@ -11,7 +11,7 @@ import { confirm } from '../services/dialog';
 import { askForNotifications, notificationsAllowed } from '../services/notifications';
 import { PRODUCTS, purchase } from '../services/purchases';
 import { deleteAccount } from '../services/social';
-import { isOnline } from '../services/supabase';
+import { isOnline } from '../services/backend';
 import { useGame } from '../state/GameProvider';
 import { colors } from '../theme';
 

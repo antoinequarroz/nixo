@@ -42,7 +42,9 @@
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "build:web": "expo export --platform web",
-    "test:db": "bash scripts/test-db.sh"
+    "test:db": "bash scripts/test-db.sh",
+    "server": "node --no-warnings server/nixo-server.mjs",
+    "test:server": "node --test --no-warnings server/nixo-server.test.mjs"
   },
   "private": true,
   "jest": {

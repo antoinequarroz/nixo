@@ -37,9 +37,21 @@ npx eas-cli@latest build --profile preview --platform ios       # nécessite le 
 | Compte | aucune inscription ; « Supprimer mon compte » efface tout, sur le téléphone et le serveur |
 | Pliables | au-delà de 600 px de large, l'accueil passe en deux panneaux |
 
+## Tester le binôme sans Supabase (serveur SQLite)
+
+Pour essayer le binôme et les témoins à plusieurs téléphones avant de créer le projet Supabase, un petit serveur de test tourne sur ton ordinateur, avec une base SQLite (`server/nixo.db`). Il applique les mêmes règles que Supabase.
+
+1. Copier `.env.example` en `.env` (il contient déjà `EXPO_PUBLIC_LOCAL_SERVER=auto`).
+2. Dans un terminal : `npm run server` (Node 22.13 ou plus récent).
+3. Dans un autre : `npm start`, puis ouvrir l'app avec Expo Go sur deux téléphones **connectés au même Wi-Fi** que l'ordinateur.
+
+Chaque téléphone reçoit un compte de test. Pour tout remettre à zéro : arrêter le serveur et supprimer `server/nixo.db`. Si les téléphones n'arrivent pas à joindre le serveur, mettre l'adresse affichée par `npm run server` à la place de `auto` (ex. `http://192.168.1.20:8787`) et vérifier que le pare-feu laisse passer le port 8787.
+
+Dès que les clés Supabase sont dans `.env`, l'app utilise Supabase et ignore ce serveur. Rien d'autre à changer.
+
 ## Brancher le serveur et les achats
 
-Sans configuration, l'app tourne en **mode simulé** (binôme, témoins et achats restent sur le téléphone). Pour passer en vrai :
+Sans configuration (ni Supabase, ni serveur de test), l'app tourne en **mode simulé** (binôme, témoins et achats restent sur le téléphone). Pour passer en vrai :
 
 1. Copier `.env.example` en `.env` et le remplir.
 2. **Supabase** (binôme, témoins, encouragements)
@@ -70,6 +82,7 @@ Dans une build de production, le labo d'horloge est caché, et Réglages propose
 ## Organisation du code
 
 ```
+server/           serveur de test SQLite (mêmes règles que Supabase)
 supabase/
   migrations/     schéma, règles d'accès et fonctions du serveur
   sql-tests/      tests du schéma (npm run test:db)
@@ -86,6 +99,7 @@ Les chiffres du jeu sont tous dans `src/domain/rules.ts`.
 
 ```bash
 npm test           # tests du moteur de jeu
+npm run test:server  # règles du serveur de test SQLite
 npm run test:db    # schéma Supabase et règles d'accès, sur un Postgres local jetable
 npm run typecheck
 # Test de bout en bout avec un Supabase local (Docker) :
